@@ -165,9 +165,10 @@
 
   .task-item input[type="checkbox"] {
     accent-color: var(--text-secondary);
-    width: 16px;
-    height: 16px;
+    width: 18px;
+    height: 18px;
     cursor: pointer;
+    border-radius: 50%;
   }
 
   .task-item.completed span.task-text {
@@ -357,10 +358,10 @@
   </div>
   <ul class="task-list" id="monthGoalList"></ul>
 
-  <h2>💳 本月財務：貸款、保費與信用卡繳費</h2>
+  <h2>💳 信用卡繳費 & 固定貸款支出</h2>
   <div class="input-group">
-    <input type="text" id="financeNameInput" class="title-input" placeholder="新增財務清單項目 (如：房貸 每月3號、國泰信用卡)...">
-    <input type="number" id="financeAmountInput" class="tag-input" placeholder="預設金額 (元)...">
+    <input type="text" id="financeNameInput" class="title-input" placeholder="新增其他財務項目 (如：房貸 每月3號、水電費)...">
+    <input type="number" id="financeAmountInput" class="tag-input" placeholder="金額 (元)...">
     <button onclick="addFinanceItem()">新增項目</button>
   </div>
   <ul class="task-list" id="financeList"></ul>
@@ -405,6 +406,16 @@
 <script>
   let currentYear = new Date().getFullYear();
   let currentMonth = new Date().getMonth() + 1;
+
+  const defaultCreditCards = [
+    { id: 'card_1', name: '元大信用卡', amount: 0, done: false },
+    { id: 'card_2', name: '台新信用卡', amount: 0, done: false },
+    { id: 'card_3', name: '國泰信用卡', amount: 0, done: false },
+    { id: 'card_4', name: '永豐信用卡', amount: 0, done: false },
+    { id: 'card_5', name: '玉山信用卡', amount: 0, done: false },
+    { id: 'card_6', name: '富邦信用卡', amount: 0, done: false },
+    { id: 'card_7', name: '聯邦信用卡', amount: 0, done: false }
+  ];
 
   let dailyTasks = JSON.parse(localStorage.getItem('my_blank_daily')) || [];
   let weeklyTasks = JSON.parse(localStorage.getItem('my_blank_weekly')) || [];
@@ -500,6 +511,15 @@
   }
 
   /* 財務支出邏輯 */
+  function getMonthFinanceItems() {
+    const mKey = getMonthKey();
+    if (!financeData[mKey]) {
+      financeData[mKey] = JSON.parse(JSON.stringify(defaultCreditCards));
+      saveData();
+    }
+    return financeData[mKey];
+  }
+
   function addFinanceItem() {
     const nameInput = document.getElementById('financeNameInput');
     const amountInput = document.getElementById('financeAmountInput');
@@ -508,7 +528,7 @@
     if (!name) return;
 
     const mKey = getMonthKey();
-    if (!financeData[mKey]) financeData[mKey] = [];
+    if (!financeData[mKey]) financeData[mKey] = JSON.parse(JSON.stringify(defaultCreditCards));
     financeData[mKey].push({ id: Date.now(), name: name, amount: amount, done: false });
     nameInput.value = '';
     amountInput.value = '';
@@ -519,7 +539,7 @@
   function toggleFinance(id) {
     const mKey = getMonthKey();
     if (financeData[mKey]) {
-      financeData[mKey] = financeData[mKey].map(item => item.id === id ? { ...item, done: !item.done } : item);
+      financeData[mKey] = financeData[mKey].map(item => String(item.id) === String(id) ? { ...item, done: !item.done } : item);
       saveData();
       renderFinance();
     }
@@ -528,7 +548,7 @@
   function deleteFinance(id) {
     const mKey = getMonthKey();
     if (financeData[mKey]) {
-      financeData[mKey] = financeData[mKey].filter(item => item.id !== id);
+      financeData[mKey] = financeData[mKey].filter(item => String(item.id) !== String(id));
       saveData();
       renderFinance();
     }
@@ -538,7 +558,7 @@
     const mKey = getMonthKey();
     const val = parseFloat(newAmount) || 0;
     if (financeData[mKey]) {
-      financeData[mKey] = financeData[mKey].map(item => item.id === id ? { ...item, amount: val } : item);
+      financeData[mKey] = financeData[mKey].map(item => String(item.id) === String(id) ? { ...item, amount: val } : item);
       saveData();
       calcTotalFinance();
     }
@@ -547,26 +567,25 @@
   function renderFinance() {
     const list = document.getElementById('financeList');
     list.innerHTML = '';
-    const mKey = getMonthKey();
-    const items = financeData[mKey] || [];
+    const items = getMonthFinanceItems();
 
     items.forEach(item => {
       const li = document.createElement('li');
       li.className = 'task-row';
       li.innerHTML = `
         <label class="task-item ${item.done ? 'completed' : ''}">
-          <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleFinance(${item.id})">
+          <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleFinance('${item.id}')">
           <span class="task-text">${escapeHtml(item.name)}</span>
         </label>
         <div style="display: flex; align-items: center; gap: 4px;">
           <input type="number" 
                  class="table-input" 
-                 style="width: 100px; text-align: right; border-bottom: 1px solid var(--border-color);" 
-                 value="${item.amount}" 
-                 onchange="updateFinanceAmount(${item.id}, this.value)"
-                 placeholder="金額">
+                 style="width: 110px; text-align: right; border-bottom: 1px solid var(--border-color);" 
+                 value="${item.amount || ''}" 
+                 onchange="updateFinanceAmount('${item.id}', this.value)"
+                 placeholder="0">
           <span style="font-size: 12px; color: var(--text-light);">元</span>
-          <button class="delete-btn" onclick="deleteFinance(${item.id})">✕</button>
+          <button class="delete-btn" onclick="deleteFinance('${item.id}')">✕</button>
         </div>
       `;
       list.appendChild(li);
@@ -576,8 +595,7 @@
   }
 
   function calcTotalFinance() {
-    const mKey = getMonthKey();
-    const items = financeData[mKey] || [];
+    const items = getMonthFinanceItems();
     let total = 0;
     items.forEach(item => total += Number(item.amount) || 0);
     document.getElementById('totalFinanceAmount').textContent = total.toLocaleString();
