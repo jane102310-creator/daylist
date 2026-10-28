@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>奶油系溫柔生活月曆</title>
+<title>Jane的生活日記</title>
 <style>
   :root {
     --bg-color: #FDFBF7;
@@ -28,14 +28,14 @@
     color: var(--text-main);
     line-height: 1.6;
     margin: 0;
-    padding: 20px;
+    padding: 20px 12px;
   }
 
   .container {
     max-width: 900px;
     margin: 0 auto;
     background-color: var(--card-bg);
-    padding: 30px;
+    padding: 24px 18px;
     border-radius: 16px;
     box-shadow: var(--shadow);
   }
@@ -48,7 +48,7 @@
   h1 {
     color: var(--text-secondary);
     font-size: 26px;
-    margin: 0 0 8px 0;
+    margin: 0 0 6px 0;
     letter-spacing: 1px;
   }
 
@@ -90,7 +90,7 @@
   .input-group {
     display: flex;
     gap: 8px;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
   }
 
   .input-group input[type="text"] {
@@ -179,8 +179,72 @@
     padding: 0 6px;
   }
 
-  .delete-btn:hover {
-    color: #E57373;
+  .delete-btn:hover { color: #E57373; }
+
+  /* 月曆網格區塊 */
+  .calendar-grid-wrapper {
+    margin-top: 15px;
+    margin-bottom: 25px;
+  }
+
+  .calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 6px;
+  }
+
+  .weekday-header {
+    text-align: center;
+    font-weight: bold;
+    color: var(--text-secondary);
+    padding: 6px 0;
+    background-color: var(--border-color);
+    border-radius: 6px;
+    font-size: 13px;
+  }
+
+  .grid-day-cell {
+    min-height: 60px;
+    background-color: var(--bg-color);
+    border-radius: 8px;
+    padding: 4px 6px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.2s;
+  }
+
+  .grid-day-cell:hover {
+    border-color: var(--accent-color);
+    background-color: #FFF;
+  }
+
+  .grid-day-cell.empty {
+    background-color: transparent;
+    cursor: default;
+    border: none;
+  }
+
+  .grid-day-num {
+    font-size: 12px;
+    font-weight: bold;
+    color: var(--text-secondary);
+  }
+
+  .grid-day-event {
+    font-size: 10px;
+    color: var(--text-main);
+    background: #FFF;
+    padding: 2px 4px;
+    border-radius: 4px;
+    border-left: 2px solid var(--accent-color);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-top: 2px;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   }
 
   /* 表格區塊 */
@@ -200,12 +264,12 @@
     color: var(--text-secondary);
     font-weight: bold;
     text-align: left;
-    padding: 12px 16px;
+    padding: 12px 14px;
     font-size: 14px;
   }
 
   td {
-    padding: 12px 16px;
+    padding: 10px 14px;
     border-bottom: 1px solid var(--border-light);
     font-size: 13px;
     color: var(--text-main);
@@ -217,19 +281,22 @@
     background-color: var(--border-light);
   }
 
-  tr:last-child td {
-    border-bottom: none;
+  tr.highlight-row {
+    background-color: #F7EFE6 !important;
+    transition: background-color 1.5s ease;
   }
 
-  tr:nth-child(even) {
-    background-color: var(--row-even);
-  }
+  tr:last-child td { border-bottom: none; }
+  tr:nth-child(even) { background-color: var(--row-even); }
 
   @media (max-width: 600px) {
-    body { padding: 10px; }
-    .container { padding: 15px; }
-    table, th, td { font-size: 12px; padding: 8px 10px; }
+    body { padding: 10px 6px; }
+    .container { padding: 16px 12px; }
+    table, th, td { font-size: 12px; padding: 8px 8px; }
     .input-group { flex-direction: column; }
+    .grid-day-cell { min-height: 50px; padding: 3px; }
+    .grid-day-num { font-size: 11px; }
+    .grid-day-event { font-size: 9px; }
   }
 </style>
 </head>
@@ -237,13 +304,21 @@
 
 <div class="container">
   <div class="header-box">
-    <h1>☕ 奶油系溫柔生活月曆</h1>
+    <h1>☕ Jane的生活日記</h1>
     <div class="subtitle">質感日常與專屬行程規劃</div>
     <div class="month-select-wrapper">
-      <select id="yearSelect" onchange="renderCalendarTable()"></select>
-      <select id="monthSelect" onchange="renderCalendarTable()"></select>
+      <select id="yearSelect" onchange="onDateChange()"></select>
+      <select id="monthSelect" onchange="onDateChange()"></select>
     </div>
   </div>
+
+  <!-- 新增：當月大重點 -->
+  <h2>📌 當月大重點 (Monthly Goals)</h2>
+  <div class="input-group">
+    <input type="text" id="monthGoalInput" class="title-input" placeholder="新增本月核心目標或重點事項...">
+    <button onclick="addMonthGoal()">新增目標</button>
+  </div>
+  <ul class="task-list" id="monthGoalList"></ul>
 
   <h2>✨ 每日循環 / 固定待辦事項 (Daily Routines)</h2>
   <div class="input-group">
@@ -261,7 +336,13 @@
   </div>
   <ul class="task-list" id="weeklyList"></ul>
 
-  <h2>📅 每日行事曆與重點待辦 <span style="font-size: 12px; font-weight: normal; color: var(--text-light);">(點擊欄位自由編輯)</span></h2>
+  <!-- 新增：網格月曆 -->
+  <h2>🗓️ 月曆概覽 <span style="font-size: 12px; font-weight: normal; color: var(--text-light);">(點擊日期直接編輯並跳至清單)</span></h2>
+  <div class="calendar-grid-wrapper">
+    <div class="calendar-grid" id="calendarGrid"></div>
+  </div>
+
+  <h2 id="tableSectionTitle">📅 每日行事曆與重點待辦 <span style="font-size: 12px; font-weight: normal; color: var(--text-light);">(點擊欄位自由編輯)</span></h2>
   <table>
     <thead>
       <tr>
@@ -277,6 +358,7 @@
 <script>
   let dailyTasks = JSON.parse(localStorage.getItem('my_blank_daily')) || [];
   let weeklyTasks = JSON.parse(localStorage.getItem('my_blank_weekly')) || [];
+  let monthGoals = JSON.parse(localStorage.getItem('my_month_goals')) || {};
   let events = JSON.parse(localStorage.getItem('my_blank_events')) || {};
 
   function init() {
@@ -303,7 +385,71 @@
 
     renderDailyTasks();
     renderWeeklyTasks();
+    onDateChange();
+  }
+
+  function onDateChange() {
+    renderMonthGoals();
+    renderCalendarGrid();
     renderCalendarTable();
+  }
+
+  /* 當月大重點邏輯 */
+  function getMonthKey() {
+    const y = document.getElementById('yearSelect').value;
+    const m = document.getElementById('monthSelect').value;
+    return `${y}-${String(m).padStart(2, '0')}`;
+  }
+
+  function addMonthGoal() {
+    const input = document.getElementById('monthGoalInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    const mKey = getMonthKey();
+    if (!monthGoals[mKey]) monthGoals[mKey] = [];
+    monthGoals[mKey].push({ id: Date.now(), text: text, done: false });
+    input.value = '';
+    saveData();
+    renderMonthGoals();
+  }
+
+  function toggleMonthGoal(id) {
+    const mKey = getMonthKey();
+    if (monthGoals[mKey]) {
+      monthGoals[mKey] = monthGoals[mKey].map(g => g.id === id ? { ...g, done: !g.done } : g);
+      saveData();
+      renderMonthGoals();
+    }
+  }
+
+  function deleteMonthGoal(id) {
+    const mKey = getMonthKey();
+    if (monthGoals[mKey]) {
+      monthGoals[mKey] = monthGoals[mKey].filter(g => g.id !== id);
+      saveData();
+      renderMonthGoals();
+    }
+  }
+
+  function renderMonthGoals() {
+    const list = document.getElementById('monthGoalList');
+    list.innerHTML = '';
+    const mKey = getMonthKey();
+    const currentGoals = monthGoals[mKey] || [];
+
+    currentGoals.forEach(g => {
+      const li = document.createElement('li');
+      li.className = 'task-row';
+      li.innerHTML = `
+        <label class="task-item ${g.done ? 'completed' : ''}">
+          <input type="checkbox" ${g.done ? 'checked' : ''} onchange="toggleMonthGoal(${g.id})">
+          <span class="task-text">${escapeHtml(g.text)}</span>
+        </label>
+        <button class="delete-btn" onclick="deleteMonthGoal(${g.id})">✕</button>
+      `;
+      list.appendChild(li);
+    });
   }
 
   /* 每日固定事項邏輯 */
@@ -380,10 +526,9 @@
     const list = document.getElementById('weeklyList');
     list.innerHTML = '';
     weeklyTasks.forEach(task => {
-      const li = document.className = 'task-row';
-      const liElem = document.createElement('li');
-      liElem.className = 'task-row';
-      liElem.innerHTML = `
+      const li = document.createElement('li');
+      li.className = 'task-row';
+      li.innerHTML = `
         <label class="task-item ${task.done ? 'completed' : ''}">
           <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleWeekly(${task.id})">
           <span class="task-text">${escapeHtml(task.text)}</span>
@@ -391,11 +536,54 @@
         </label>
         <button class="delete-btn" onclick="deleteWeekly(${task.id})">✕</button>
       `;
-      list.appendChild(liElem);
+      list.appendChild(li);
     });
   }
 
-  /* 月曆表格渲染與編輯邏輯 */
+  /* 網格月曆渲染 */
+  function renderCalendarGrid() {
+    const year = parseInt(document.getElementById('yearSelect').value);
+    const month = parseInt(document.getElementById('monthSelect').value);
+    const grid = document.getElementById('calendarGrid');
+    grid.innerHTML = '';
+
+    const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+    weekdays.forEach(w => {
+      const header = document.createElement('div');
+      header.className = 'weekday-header';
+      header.textContent = w;
+      grid.appendChild(header);
+    });
+
+    const firstDay = new Date(year, month - 1, 1).getDay();
+    const daysInMonth = new Date(year, month, 0).getDate();
+
+    for (let i = 0; i < firstDay; i++) {
+      const empty = document.createElement('div');
+      empty.className = 'grid-day-cell empty';
+      grid.appendChild(empty);
+    }
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const cell = document.createElement('div');
+      cell.className = 'grid-day-cell';
+      const monthFormatted = String(month).padStart(2, '0');
+      const dayFormatted = String(d).padStart(2, '0');
+      const dateKey = `${year}-${monthFormatted}-${dayFormatted}`;
+      const dateStr = `${monthFormatted}/${dayFormatted}`;
+      const eventText = events[dateKey] || '';
+
+      cell.innerHTML = `
+        <div class="grid-day-num">${d}</div>
+        ${eventText ? `<div class="grid-day-event">${escapeHtml(eventText)}</div>` : ''}
+      `;
+
+      cell.onclick = () => jumpToAndEdit(dateKey, dateStr, d);
+      grid.appendChild(cell);
+    }
+  }
+
+  /* 月曆表格渲染與編輯 */
   function renderCalendarTable() {
     const year = parseInt(document.getElementById('yearSelect').value);
     const month = parseInt(document.getElementById('monthSelect').value);
@@ -414,6 +602,7 @@
       const eventText = events[dateKey] || '';
 
       const tr = document.createElement('tr');
+      tr.id = `row-${d}`;
       tr.innerHTML = `
         <td>${dateStr}</td>
         <td>${dayOfWeek}</td>
@@ -421,6 +610,16 @@
       `;
       tbody.appendChild(tr);
     }
+  }
+
+  function jumpToAndEdit(dateKey, dateStr, dayNum) {
+    const row = document.getElementById(`row-${dayNum}`);
+    if (row) {
+      row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      row.classList.add('highlight-row');
+      setTimeout(() => row.classList.remove('highlight-row'), 2000);
+    }
+    editEvent(dateKey, dateStr);
   }
 
   function editEvent(dateKey, dateStr) {
@@ -433,6 +632,7 @@
         events[dateKey] = newText.trim();
       }
       saveData();
+      renderCalendarGrid();
       renderCalendarTable();
     }
   }
@@ -440,6 +640,7 @@
   function saveData() {
     localStorage.setItem('my_blank_daily', JSON.stringify(dailyTasks));
     localStorage.setItem('my_blank_weekly', JSON.stringify(weeklyTasks));
+    localStorage.setItem('my_month_goals', JSON.stringify(monthGoals));
     localStorage.setItem('my_blank_events', JSON.stringify(events));
   }
 
