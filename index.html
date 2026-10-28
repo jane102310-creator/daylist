@@ -273,17 +273,29 @@
     border-bottom: 1px solid var(--border-light);
     font-size: 13px;
     color: var(--text-main);
-    cursor: pointer;
-    transition: background 0.15s;
   }
 
-  td.event-cell:hover {
-    background-color: var(--border-light);
+  .table-input {
+    width: 100%;
+    border: 1px solid transparent;
+    background: transparent;
+    font-family: inherit;
+    font-size: 13px;
+    color: var(--text-main);
+    padding: 6px 8px;
+    border-radius: 6px;
+    outline: none;
+    transition: all 0.2s;
+  }
+
+  .table-input:hover, .table-input:focus {
+    background: var(--bg-color);
+    border-color: var(--accent-color);
   }
 
   tr.highlight-row {
     background-color: #F7EFE6 !important;
-    transition: background-color 1.5s ease;
+    transition: background-color 2s ease;
   }
 
   tr:last-child td { border-bottom: none; }
@@ -292,7 +304,7 @@
   @media (max-width: 600px) {
     body { padding: 10px 6px; }
     .container { padding: 16px 12px; }
-    table, th, td { font-size: 12px; padding: 8px 8px; }
+    table, th, td { font-size: 12px; padding: 8px 6px; }
     .input-group { flex-direction: column; }
     .grid-day-cell { min-height: 50px; padding: 3px; }
     .grid-day-num { font-size: 11px; }
@@ -312,7 +324,6 @@
     </div>
   </div>
 
-  <!-- 新增：當月大重點 -->
   <h2>📌 當月大重點 (Monthly Goals)</h2>
   <div class="input-group">
     <input type="text" id="monthGoalInput" class="title-input" placeholder="新增本月核心目標或重點事項...">
@@ -336,13 +347,12 @@
   </div>
   <ul class="task-list" id="weeklyList"></ul>
 
-  <!-- 新增：網格月曆 -->
-  <h2>🗓️ 月曆概覽 <span style="font-size: 12px; font-weight: normal; color: var(--text-light);">(點擊日期直接編輯並跳至清單)</span></h2>
+  <h2>🗓️ 月曆概覽 <span style="font-size: 12px; font-weight: normal; color: var(--text-light);">(點擊日期直接帶入下方編輯)</span></h2>
   <div class="calendar-grid-wrapper">
     <div class="calendar-grid" id="calendarGrid"></div>
   </div>
 
-  <h2 id="tableSectionTitle">📅 每日行事曆與重點待辦 <span style="font-size: 12px; font-weight: normal; color: var(--text-light);">(點擊欄位自由編輯)</span></h2>
+  <h2>📅 每日行事曆與重點待辦</h2>
   <table>
     <thead>
       <tr>
@@ -394,7 +404,6 @@
     renderCalendarTable();
   }
 
-  /* 當月大重點邏輯 */
   function getMonthKey() {
     const y = document.getElementById('yearSelect').value;
     const m = document.getElementById('monthSelect').value;
@@ -452,7 +461,6 @@
     });
   }
 
-  /* 每日固定事項邏輯 */
   function addDailyTask() {
     const textInput = document.getElementById('dailyInput');
     const tagInput = document.getElementById('dailyTagInput');
@@ -496,7 +504,6 @@
     });
   }
 
-  /* 每週待辦事項邏輯 */
   function addWeeklyTask() {
     const textInput = document.getElementById('weeklyInput');
     const tagInput = document.getElementById('weeklyTagInput');
@@ -540,7 +547,6 @@
     });
   }
 
-  /* 網格月曆渲染 */
   function renderCalendarGrid() {
     const year = parseInt(document.getElementById('yearSelect').value);
     const month = parseInt(document.getElementById('monthSelect').value);
@@ -570,7 +576,6 @@
       const monthFormatted = String(month).padStart(2, '0');
       const dayFormatted = String(d).padStart(2, '0');
       const dateKey = `${year}-${monthFormatted}-${dayFormatted}`;
-      const dateStr = `${monthFormatted}/${dayFormatted}`;
       const eventText = events[dateKey] || '';
 
       cell.innerHTML = `
@@ -578,12 +583,11 @@
         ${eventText ? `<div class="grid-day-event">${escapeHtml(eventText)}</div>` : ''}
       `;
 
-      cell.onclick = () => jumpToAndEdit(dateKey, dateStr, d);
+      cell.onclick = () => jumpToRow(d);
       grid.appendChild(cell);
     }
   }
 
-  /* 月曆表格渲染與編輯 */
   function renderCalendarTable() {
     const year = parseInt(document.getElementById('yearSelect').value);
     const month = parseInt(document.getElementById('monthSelect').value);
@@ -606,35 +610,39 @@
       tr.innerHTML = `
         <td>${dateStr}</td>
         <td>${dayOfWeek}</td>
-        <td class="event-cell" onclick="editEvent('${dateKey}', '${dateStr}')">${escapeHtml(eventText)}</td>
+        <td>
+          <input type="text" 
+                 class="table-input" 
+                 id="input-${d}"
+                 value="${escapeHtml(eventText)}" 
+                 placeholder="填寫行程..." 
+                 onchange="updateEvent('${dateKey}', this.value)">
+        </td>
       `;
       tbody.appendChild(tr);
     }
   }
 
-  function jumpToAndEdit(dateKey, dateStr, dayNum) {
+  function jumpToRow(dayNum) {
     const row = document.getElementById(`row-${dayNum}`);
-    if (row) {
+    const input = document.getElementById(`input-${dayNum}`);
+    if (row && input) {
       row.scrollIntoView({ behavior: 'smooth', block: 'center' });
       row.classList.add('highlight-row');
       setTimeout(() => row.classList.remove('highlight-row'), 2000);
+      input.focus();
     }
-    editEvent(dateKey, dateStr);
   }
 
-  function editEvent(dateKey, dateStr) {
-    const currentText = events[dateKey] || '';
-    const newText = prompt(`請輸入 ${dateStr} 的重點行程與事項：`, currentText);
-    if (newText !== null) {
-      if (newText.trim() === '') {
-        delete events[dateKey];
-      } else {
-        events[dateKey] = newText.trim();
-      }
-      saveData();
-      renderCalendarGrid();
-      renderCalendarTable();
+  function updateEvent(dateKey, value) {
+    const val = value.trim();
+    if (val === '') {
+      delete events[dateKey];
+    } else {
+      events[dateKey] = val;
     }
+    saveData();
+    renderCalendarGrid();
   }
 
   function saveData() {
@@ -645,7 +653,7 @@
   }
 
   function escapeHtml(text) {
-    return text ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+    return text ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;") : '';
   }
 
   init();
