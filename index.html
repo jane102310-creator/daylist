@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>2026年 11 月 奶油系溫柔生活月曆</title>
+<title>奶油系溫柔生活月曆</title>
 <style>
   :root {
     --bg-color: #FDFBF7;
@@ -15,8 +15,12 @@
     --border-light: #F5F2EC;
     --row-even: #FCFBF9;
     --tag-bg: #F3EFEA;
+    --accent-color: #D9C5B2;
+    --accent-hover: #C5B09D;
     --shadow: 0 4px 12px rgba(181, 164, 150, 0.08);
   }
+
+  * { box-sizing: border-box; }
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -36,19 +40,42 @@
     box-shadow: var(--shadow);
   }
 
+  .header-box {
+    text-align: center;
+    margin-bottom: 25px;
+  }
+
   h1 {
     color: var(--text-secondary);
-    text-align: center;
     font-size: 26px;
-    margin-bottom: 5px;
+    margin: 0 0 8px 0;
     letter-spacing: 1px;
   }
 
   .subtitle {
-    text-align: center;
     color: var(--text-light);
     font-size: 14px;
-    margin-bottom: 30px;
+    margin: 0;
+  }
+
+  .month-select-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 15px;
+  }
+
+  select {
+    font-family: inherit;
+    padding: 6px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-color);
+    color: var(--text-main);
+    font-size: 14px;
+    outline: none;
+    cursor: pointer;
   }
 
   h2 {
@@ -59,14 +86,56 @@
     margin-top: 30px;
   }
 
-  ul {
-    padding-left: 20px;
+  /* 輸入框群組 */
+  .input-group {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 15px;
+  }
+
+  .input-group input[type="text"] {
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background-color: var(--bg-color);
+    font-size: 13px;
+    outline: none;
+  }
+
+  .input-group input.title-input { flex: 2; }
+  .input-group input.tag-input { flex: 1; }
+
+  .input-group button {
+    padding: 8px 16px;
+    background-color: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.2s;
+    white-space: nowrap;
+  }
+
+  .input-group button:hover {
+    background-color: var(--accent-hover);
+  }
+
+  /* 待辦事項列表 */
+  ul.task-list {
+    list-style: none;
+    padding: 0;
     margin: 10px 0;
   }
 
-  li {
-    margin-bottom: 10px;
-    font-size: 14px;
+  li.task-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 10px;
+    background-color: var(--bg-color);
+    border-radius: 8px;
+    margin-bottom: 8px;
   }
 
   .task-item {
@@ -74,6 +143,8 @@
     align-items: center;
     gap: 8px;
     cursor: pointer;
+    flex: 1;
+    font-size: 14px;
   }
 
   .task-item input[type="checkbox"] {
@@ -83,7 +154,7 @@
     cursor: pointer;
   }
 
-  .task-item.completed span {
+  .task-item.completed span.task-text {
     text-decoration: line-through;
     color: var(--text-light);
   }
@@ -96,8 +167,23 @@
     border-radius: 6px;
     font-size: 11px;
     margin-left: 6px;
+    white-space: nowrap;
   }
 
+  .delete-btn {
+    background: none;
+    border: none;
+    color: var(--text-light);
+    font-size: 14px;
+    cursor: pointer;
+    padding: 0 6px;
+  }
+
+  .delete-btn:hover {
+    color: #E57373;
+  }
+
+  /* 表格區塊 */
   table {
     width: 100%;
     border-collapse: collapse;
@@ -123,6 +209,12 @@
     border-bottom: 1px solid var(--border-light);
     font-size: 13px;
     color: var(--text-main);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  td.event-cell:hover {
+    background-color: var(--border-light);
   }
 
   tr:last-child td {
@@ -134,83 +226,42 @@
   }
 
   @media (max-width: 600px) {
-    body {
-      padding: 10px;
-    }
-    .container {
-      padding: 15px;
-    }
-    table, th, td {
-      font-size: 12px;
-      padding: 8px 10px;
-    }
+    body { padding: 10px; }
+    .container { padding: 15px; }
+    table, th, td { font-size: 12px; padding: 8px 10px; }
+    .input-group { flex-direction: column; }
   }
 </style>
 </head>
 <body>
 
 <div class="container">
-  <h1>☕ 2026 年 11 月 奶油系溫柔生活月曆</h1>
-  <div class="subtitle">Omo! Sindy 選品店 × 質感日常規劃</div>
+  <div class="header-box">
+    <h1>☕ 奶油系溫柔生活月曆</h1>
+    <div class="subtitle">質感日常與專屬行程規劃</div>
+    <div class="month-select-wrapper">
+      <select id="yearSelect" onchange="renderCalendarTable()"></select>
+      <select id="monthSelect" onchange="renderCalendarTable()"></select>
+    </div>
+  </div>
 
   <h2>✨ 每日循環 / 固定待辦事項 (Daily Routines)</h2>
-  <ul>
-    <li>
-      <label class="task-item">
-        <input type="checkbox" onchange="toggleCheck(this)">
-        <span><b>Omo! Sindy 營運：</b>檢查 Kakao Story 批發動態、新品上架與選品補貨確認</span>
-        <span class="tag">選品店</span>
-      </label>
-    </li>
-    <li>
-      <label class="task-item">
-        <input type="checkbox" onchange="toggleCheck(this)">
-        <span><b>訂單與系統：</b>Google Sheets 訂單管理系統核對、回覆買家私訊與出貨追蹤</span>
-        <span class="tag">工作</span>
-      </label>
-    </li>
-    <li>
-      <label class="task-item">
-        <input type="checkbox" onchange="toggleCheck(this)">
-        <span><b>居家日常：</b>維持暖調 Muji 風格空間整潔、隨手收納</span>
-        <span class="tag">生活</span>
-      </label>
-    </li>
-    <li>
-      <label class="task-item">
-        <input type="checkbox" onchange="toggleCheck(this)">
-        <span><b>親子時光：</b>陪伴孩子日常作息與睡前溫馨陪伴</span>
-        <span class="tag">家庭</span>
-      </label>
-    </li>
-  </ul>
+  <div class="input-group">
+    <input type="text" id="dailyInput" class="title-input" placeholder="新增固定日常事項 (如：Omo! Sindy 營運...)">
+    <input type="text" id="dailyTagInput" class="tag-input" placeholder="標籤 (如：選品店)">
+    <button onclick="addDailyTask()">新增</button>
+  </div>
+  <ul class="task-list" id="dailyList"></ul>
 
   <h2>🌿 每週 / 階段性一般待辦事項</h2>
-  <ul>
-    <li>
-      <label class="task-item">
-        <input type="checkbox" onchange="toggleCheck(this)">
-        <span><b>網頁小工具開發：</b>持續優化選品店訂單管理與採購工具（Google Sheets API 串接測試）</span>
-        <span class="tag">專案</span>
-      </label>
-    </li>
-    <li>
-      <label class="task-item">
-        <input type="checkbox" onchange="toggleCheck(this)">
-        <span><b>庫存與耗材：</b>盤點韓國兒童服飾、文具、生活選品庫存與精緻包裝耗材</span>
-        <span class="tag">採購</span>
-      </label>
-    </li>
-    <li>
-      <label class="task-item">
-        <input type="checkbox" onchange="toggleCheck(this)">
-        <span><b>靈感收集：</b>使用 iPad Pro 進行室內空間風格佈置與渲染靈感收集</span>
-        <span class="tag">個人</span>
-      </label>
-    </li>
-  </ul>
+  <div class="input-group">
+    <input type="text" id="weeklyInput" class="title-input" placeholder="新增每週待辦事項 (如：庫存與耗材盤點...)">
+    <input type="text" id="weeklyTagInput" class="tag-input" placeholder="標籤 (如：採購)">
+    <button onclick="addWeeklyTask()">新增</button>
+  </div>
+  <ul class="task-list" id="weeklyList"></ul>
 
-  <h2>📅 11 月每日行事曆與重點代辦</h2>
+  <h2>📅 每日行事曆與重點待辦 <span style="font-size: 12px; font-weight: normal; color: var(--text-light);">(點擊欄位自由編輯)</span></h2>
   <table>
     <thead>
       <tr>
@@ -219,51 +270,184 @@
         <th>重點行程與專屬待辦事項</th>
       </tr>
     </thead>
-    <tbody>
-      <tr><td>11/01</td><td>日</td><td>週末居家大掃除與空間佈置微調、享受咖啡時光</td></tr>
-      <tr><td>11/02</td><td>一</td><td>聯繫南大門市場批發商，確認本週韓國童裝新品預購清單</td></tr>
-      <tr><td>11/03</td><td>二</td><td>處理 Google Sheets 訂單管理系統 API 串接資料校對</td></tr>
-      <tr><td>11/04</td><td>三</td><td>整理 Omo! Sindy 本週新品開團文案與奶油色系拍照素材</td></tr>
-      <tr><td>11/05</td><td>四</td><td>檢查選品包裝耗材庫存，準備週末出貨小卡與紙箱</td></tr>
-      <tr><td>11/06</td><td>五</td><td>集中處理本週累積之顧客訂單與物流寄件</td></tr>
-      <tr><td>11/07</td><td>六</td><td>家庭溫馨採買與陪伴家人，享受放鬆週末</td></tr>
-      <tr><td>11/08</td><td>日</td><td>檢視本月選品店營運進度與下週採購排程</td></tr>
-      <tr><td>11/09</td><td>一</td><td>瀏覽 10x10 與 Olive Young 新品，尋找質感生活小物靈感</td></tr>
-      <tr><td>11/10</td><td>二</td><td>網頁版選品訂單管理工具後台功能測試</td></tr>
-      <tr><td>11/11</td><td>三</td><td>雙十一檔期相關訂單追蹤與溫馨客服回覆</td></tr>
-      <tr><td>11/12</td><td>四</td><td>整理韓國批發採購帳款與對帳作業</td></tr>
-      <tr><td>11/13</td><td>五</td><td>週末前夕訂單結算與精緻打包出貨</td></tr>
-      <tr><td>11/14</td><td>六</td><td>挑選居家收納好物，規劃局部空間改造</td></tr>
-      <tr><td>11/15</td><td>日</td><td>悠閒家庭日、享用甜點與療癒下午茶</td></tr>
-      <tr><td>11/16</td><td>一</td><td>確認本週韓國直送包裹物流進度</td></tr>
-      <tr><td>11/17</td><td>二</td><td>系統化整理 Google Sheets 訂單分類標籤</td></tr>
-      <tr><td>11/18</td><td>三</td><td>拍攝新到貨的韓國文具與童裝質感照片</td></tr>
-      <tr><td>11/19</td><td>四</td><td>撰寫社群暖心貼文、更新 Kakao Story 預購動態</td></tr>
-      <tr><td>11/20</td><td>五</td><td>處理私訊訂單寄件與庫存盤點</td></tr>
-      <tr><td>11/21</td><td>六</td><td>與家人外出聚餐、放鬆身心</td></tr>
-      <tr><td>11/22</td><td>日</td><td>整理平板中的室內設計靈感相簿與清單</td></tr>
-      <tr><td>11/23</td><td>一</td><td>聯繫貨運安排本週批發到貨事宜</td></tr>
-      <tr><td>11/24</td><td>二</td><td>檢視網頁小工具使用流暢度，記錄待優化項目</td></tr>
-      <tr><td>11/25</td><td>三</td><td>準備月底前夕的限時優惠或新品預告企劃</td></tr>
-      <tr><td>11/26</td><td>四</td><td>核對採購成本與當月財務收支明細</td></tr>
-      <tr><td>11/27</td><td>五</td><td>月底包裹集中寄出、回覆顧客物流查詢</td></tr>
-      <tr><td>11/28</td><td>六</td><td>陪伴孩子進行假日手作或繪本閱讀</td></tr>
-      <tr><td>11/29</td><td>日</td><td>整理居家環境，為下週預做準備</td></tr>
-      <tr><td>11/30</td><td>一</td><td>11月份選品店營運總結與 12 月聖誕檔期初步規劃</td></tr>
-    </tbody>
+    <tbody id="calendarTableBody"></tbody>
   </table>
 </div>
 
 <script>
-  function toggleCheck(checkbox) {
-    const item = checkbox.closest('.task-item');
-    if (checkbox.checked) {
-      item.classList.add('completed');
-    } else {
-      item.classList.remove('completed');
+  let dailyTasks = JSON.parse(localStorage.getItem('my_blank_daily')) || [];
+  let weeklyTasks = JSON.parse(localStorage.getItem('my_blank_weekly')) || [];
+  let events = JSON.parse(localStorage.getItem('my_blank_events')) || {};
+
+  function init() {
+    const yearSelect = document.getElementById('yearSelect');
+    const monthSelect = document.getElementById('monthSelect');
+    const now = new Date();
+
+    const currentYear = now.getFullYear();
+    for (let y = currentYear - 2; y <= currentYear + 5; y++) {
+      const opt = document.createElement('option');
+      opt.value = y;
+      opt.textContent = y + ' 年';
+      if (y === currentYear) opt.selected = true;
+      yearSelect.appendChild(opt);
+    }
+
+    for (let m = 1; m <= 12; m++) {
+      const opt = document.createElement('option');
+      opt.value = m;
+      opt.textContent = m + ' 月';
+      if (m === (now.getMonth() + 1)) opt.selected = true;
+      monthSelect.appendChild(opt);
+    }
+
+    renderDailyTasks();
+    renderWeeklyTasks();
+    renderCalendarTable();
+  }
+
+  /* 每日固定事項邏輯 */
+  function addDailyTask() {
+    const textInput = document.getElementById('dailyInput');
+    const tagInput = document.getElementById('dailyTagInput');
+    const text = textInput.value.trim();
+    if (!text) return;
+
+    dailyTasks.push({ id: Date.now(), text: text, tag: tagInput.value.trim(), done: false });
+    textInput.value = '';
+    tagInput.value = '';
+    saveData();
+    renderDailyTasks();
+  }
+
+  function toggleDaily(id) {
+    dailyTasks = dailyTasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
+    saveData();
+    renderDailyTasks();
+  }
+
+  function deleteDaily(id) {
+    dailyTasks = dailyTasks.filter(t => t.id !== id);
+    saveData();
+    renderDailyTasks();
+  }
+
+  function renderDailyTasks() {
+    const list = document.getElementById('dailyList');
+    list.innerHTML = '';
+    dailyTasks.forEach(task => {
+      const li = document.createElement('li');
+      li.className = 'task-row';
+      li.innerHTML = `
+        <label class="task-item ${task.done ? 'completed' : ''}">
+          <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleDaily(${task.id})">
+          <span class="task-text">${escapeHtml(task.text)}</span>
+          ${task.tag ? `<span class="tag">${escapeHtml(task.tag)}</span>` : ''}
+        </label>
+        <button class="delete-btn" onclick="deleteDaily(${task.id})">✕</button>
+      `;
+      list.appendChild(li);
+    });
+  }
+
+  /* 每週待辦事項邏輯 */
+  function addWeeklyTask() {
+    const textInput = document.getElementById('weeklyInput');
+    const tagInput = document.getElementById('weeklyTagInput');
+    const text = textInput.value.trim();
+    if (!text) return;
+
+    weeklyTasks.push({ id: Date.now(), text: text, tag: tagInput.value.trim(), done: false });
+    textInput.value = '';
+    tagInput.value = '';
+    saveData();
+    renderWeeklyTasks();
+  }
+
+  function toggleWeekly(id) {
+    weeklyTasks = weeklyTasks.map(t => t.id === id ? { ...t, done: !t.done } : t);
+    saveData();
+    renderWeeklyTasks();
+  }
+
+  function deleteWeekly(id) {
+    weeklyTasks = weeklyTasks.filter(t => t.id !== id);
+    saveData();
+    renderWeeklyTasks();
+  }
+
+  function renderWeeklyTasks() {
+    const list = document.getElementById('weeklyList');
+    list.innerHTML = '';
+    weeklyTasks.forEach(task => {
+      const li = document.className = 'task-row';
+      const liElem = document.createElement('li');
+      liElem.className = 'task-row';
+      liElem.innerHTML = `
+        <label class="task-item ${task.done ? 'completed' : ''}">
+          <input type="checkbox" ${task.done ? 'checked' : ''} onchange="toggleWeekly(${task.id})">
+          <span class="task-text">${escapeHtml(task.text)}</span>
+          ${task.tag ? `<span class="tag">${escapeHtml(task.tag)}</span>` : ''}
+        </label>
+        <button class="delete-btn" onclick="deleteWeekly(${task.id})">✕</button>
+      `;
+      list.appendChild(liElem);
+    });
+  }
+
+  /* 月曆表格渲染與編輯邏輯 */
+  function renderCalendarTable() {
+    const year = parseInt(document.getElementById('yearSelect').value);
+    const month = parseInt(document.getElementById('monthSelect').value);
+    const tbody = document.getElementById('calendarTableBody');
+    tbody.innerHTML = '';
+
+    const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+    const daysInMonth = new Date(year, month, 0).getDate();
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dayOfWeek = weekdays[new Date(year, month - 1, d).getDay()];
+      const monthFormatted = String(month).padStart(2, '0');
+      const dayFormatted = String(d).padStart(2, '0');
+      const dateStr = `${monthFormatted}/${dayFormatted}`;
+      const dateKey = `${year}-${monthFormatted}-${dayFormatted}`;
+      const eventText = events[dateKey] || '';
+
+      const tr = document.createElement('tr');
+      tr.innerHTML = `
+        <td>${dateStr}</td>
+        <td>${dayOfWeek}</td>
+        <td class="event-cell" onclick="editEvent('${dateKey}', '${dateStr}')">${escapeHtml(eventText)}</td>
+      `;
+      tbody.appendChild(tr);
     }
   }
-</script>
 
+  function editEvent(dateKey, dateStr) {
+    const currentText = events[dateKey] || '';
+    const newText = prompt(`請輸入 ${dateStr} 的重點行程與事項：`, currentText);
+    if (newText !== null) {
+      if (newText.trim() === '') {
+        delete events[dateKey];
+      } else {
+        events[dateKey] = newText.trim();
+      }
+      saveData();
+      renderCalendarTable();
+    }
+  }
+
+  function saveData() {
+    localStorage.setItem('my_blank_daily', JSON.stringify(dailyTasks));
+    localStorage.setItem('my_blank_weekly', JSON.stringify(weeklyTasks));
+    localStorage.setItem('my_blank_events', JSON.stringify(events));
+  }
+
+  function escapeHtml(text) {
+    return text ? text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;") : '';
+  }
+
+  init();
+</script>
 </body>
 </html>
