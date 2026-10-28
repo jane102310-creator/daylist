@@ -58,7 +58,6 @@
     margin: 0;
   }
 
-  /* 左右按鈕切換列 */
   .date-nav-bar {
     display: flex;
     justify-content: center;
@@ -105,14 +104,13 @@
     margin-top: 30px;
   }
 
-  /* 輸入框群組 */
   .input-group {
     display: flex;
     gap: 8px;
     margin-bottom: 12px;
   }
 
-  .input-group input[type="text"] {
+  .input-group input[type="text"], .input-group input[type="number"] {
     padding: 8px 12px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
@@ -140,7 +138,6 @@
     background-color: var(--accent-hover);
   }
 
-  /* 待辦事項列表 */
   ul.task-list {
     list-style: none;
     padding: 0;
@@ -200,7 +197,17 @@
 
   .delete-btn:hover { color: #E57373; }
 
-  /* 月曆網格區塊 */
+  .finance-total-box {
+    text-align: right;
+    font-weight: bold;
+    color: var(--text-secondary);
+    margin-bottom: 25px;
+    font-size: 14px;
+    background: var(--bg-color);
+    padding: 8px 12px;
+    border-radius: 8px;
+  }
+
   .calendar-grid-wrapper {
     margin-top: 15px;
     margin-bottom: 25px;
@@ -266,7 +273,6 @@
     box-shadow: 0 1px 2px rgba(0,0,0,0.04);
   }
 
-  /* 表格區塊 */
   table {
     width: 100%;
     border-collapse: collapse;
@@ -351,6 +357,17 @@
   </div>
   <ul class="task-list" id="monthGoalList"></ul>
 
+  <h2>💳 本月財務：貸款、保費與信用卡繳費</h2>
+  <div class="input-group">
+    <input type="text" id="financeNameInput" class="title-input" placeholder="項目名稱 (如：房貸24035元 每月3號、國泰信用卡)...">
+    <input type="number" id="financeAmountInput" class="tag-input" placeholder="應繳金額 (元)...">
+    <button onclick="addFinanceItem()">新增支出</button>
+  </div>
+  <ul class="task-list" id="financeList"></ul>
+  <div class="finance-total-box">
+    💰 本月預估總支出：<span id="totalFinanceAmount">0</span> 元
+  </div>
+
   <h2>✨ 每日循環 / 固定待辦事項 (Daily Routines)</h2>
   <div class="input-group">
     <input type="text" id="dailyInput" class="title-input" placeholder="新增固定日常事項 (如：Omo! Sindy 營運...)">
@@ -387,11 +404,12 @@
 
 <script>
   let currentYear = new Date().getFullYear();
-  let currentMonth = new Date().getMonth() + 1; // 1-12
+  let currentMonth = new Date().getMonth() + 1;
 
   let dailyTasks = JSON.parse(localStorage.getItem('my_blank_daily')) || [];
   let weeklyTasks = JSON.parse(localStorage.getItem('my_blank_weekly')) || [];
   let monthGoals = JSON.parse(localStorage.getItem('my_month_goals')) || {};
+  let financeData = JSON.parse(localStorage.getItem('my_finance_data')) || {};
   let events = JSON.parse(localStorage.getItem('my_blank_events')) || {};
 
   function init() {
@@ -420,6 +438,7 @@
 
   function onDateChange() {
     renderMonthGoals();
+    renderFinance();
     renderCalendarGrid();
     renderCalendarTable();
   }
@@ -428,6 +447,7 @@
     return `${currentYear}-${String(currentMonth).padStart(2, '0')}`;
   }
 
+  /* 當月大重點邏輯 */
   function addMonthGoal() {
     const input = document.getElementById('monthGoalInput');
     const text = input.value.trim();
@@ -479,6 +499,86 @@
     });
   }
 
+  /* 財務支出邏輯 */
+  function addFinanceItem() {
+    const nameInput = document.getElementById('financeNameInput');
+    const amountInput = document.getElementById('financeAmountInput');
+    const name = nameInput.value.trim();
+    const amount = parseFloat(amountInput.value) || 0;
+    if (!name) return;
+
+    const mKey = getMonthKey();
+    if (!financeData[mKey]) financeData[mKey] = [];
+    financeData[mKey].push({ id: Date.now(), name: name, amount: amount, done: false });
+    nameInput.value = '';
+    amountInput.value = '';
+    saveData();
+    renderFinance();
+  }
+
+  function toggleFinance(id) {
+    const mKey = getMonthKey();
+    if (financeData[mKey]) {
+      financeData[mKey] = financeData[mKey].map(item => item.id === id ? { ...item, done: !item.done } : item);
+      saveData();
+      renderFinance();
+    }
+  }
+
+  function deleteFinance(id) {
+    const mKey = getMonthKey();
+    if (financeData[mKey]) {
+      financeData[mKey] = financeData[mKey].filter(item => item.id !== id);
+      saveData();
+      renderFinance();
+    }
+  }
+
+  function updateFinanceAmount(id, newAmount) {
+    const mKey = getMonthKey();
+    const val = parseFloat(newAmount) || 0;
+    if (financeData[mKey]) {
+      financeData[mKey] = financeData[mKey].map(item => item.id === id ? { ...item, amount: val } : item);
+      saveData();
+      calcTotalFinance();
+    }
+  }
+
+  function renderFinance() {
+    const list = document.getElementById('financeList');
+    list.innerHTML = '';
+    const mKey = getMonthKey();
+    const items = financeData[mKey] || [];
+
+    items.forEach(item => {
+      const li = document.createElement('li');
+      li.className = 'task-row';
+      li.innerHTML = `
+        <label class="task-item ${item.done ? 'completed' : ''}">
+          <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleFinance(${item.id})">
+          <span class="task-text">${escapeHtml(item.name)}</span>
+        </label>
+        <div style="display: flex; align-items: center; gap: 4px;">
+          <input type="number" class="table-input" style="width: 100px; text-align: right;" value="${item.amount}" onchange="updateFinanceAmount(${item.id}, this.value)">
+          <span style="font-size: 12px; color: var(--text-light);">元</span>
+          <button class="delete-btn" onclick="deleteFinance(${item.id})">✕</button>
+        </div>
+      `;
+      list.appendChild(li);
+    });
+
+    calcTotalFinance();
+  }
+
+  function calcTotalFinance() {
+    const mKey = getMonthKey();
+    const items = financeData[mKey] || [];
+    let total = 0;
+    items.forEach(item => total += Number(item.amount) || 0);
+    document.getElementById('totalFinanceAmount').textContent = total.toLocaleString();
+  }
+
+  /* 每日固定日常 */
   function addDailyTask() {
     const textInput = document.getElementById('dailyInput');
     const tagInput = document.getElementById('dailyTagInput');
@@ -522,6 +622,7 @@
     });
   }
 
+  /* 每週待辦事項 */
   function addWeeklyTask() {
     const textInput = document.getElementById('weeklyInput');
     const tagInput = document.getElementById('weeklyTagInput');
@@ -565,6 +666,7 @@
     });
   }
 
+  /* 網格月曆 */
   function renderCalendarGrid() {
     const grid = document.getElementById('calendarGrid');
     grid.innerHTML = '';
@@ -604,6 +706,7 @@
     }
   }
 
+  /* 行事曆表格 */
   function renderCalendarTable() {
     const tbody = document.getElementById('calendarTableBody');
     tbody.innerHTML = '';
@@ -663,6 +766,7 @@
     localStorage.setItem('my_blank_daily', JSON.stringify(dailyTasks));
     localStorage.setItem('my_blank_weekly', JSON.stringify(weeklyTasks));
     localStorage.setItem('my_month_goals', JSON.stringify(monthGoals));
+    localStorage.setItem('my_finance_data', JSON.stringify(financeData));
     localStorage.setItem('my_blank_events', JSON.stringify(events));
   }
 
