@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>奶油系萬用生活月曆</title>
+<title>Omo! Sindy 奶油系溫柔生活月曆</title>
 <style>
   :root {
     --bg-color: #FDFBF7;
@@ -12,11 +12,13 @@
     --text-secondary: #8C7B70;
     --text-light: #B5A496;
     --border-color: #EFECE6;
-    --border-light: #F5F2EC;
     --accent-color: #D9C5B2;
     --accent-hover: #C5B09D;
-    --shadow: 0 4px 12px rgba(181, 164, 150, 0.08);
+    --chip-bg: #F7F3ED;
+    --shadow: 0 4px 16px rgba(181, 164, 150, 0.1);
   }
+
+  * { box-sizing: border-box; }
 
   body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -24,106 +26,133 @@
     color: var(--text-main);
     line-height: 1.6;
     margin: 0;
-    padding: 20px;
+    padding: 24px 16px;
   }
 
-  .container {
-    max-width: 900px;
-    margin: 0 auto;
-    background-color: var(--card-bg);
-    padding: 30px;
-    border-radius: 16px;
-    box-shadow: var(--shadow);
-  }
-
-  .header-control {
+  .header-banner {
+    max-width: 1200px;
+    margin: 0 auto 20px auto;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-bottom: 20px;
+    background: var(--card-bg);
+    padding: 20px 24px;
+    border-radius: 16px;
+    box-shadow: var(--shadow);
     flex-wrap: wrap;
-    gap: 10px;
+    gap: 12px;
   }
 
   h1 {
+    font-size: 22px;
     color: var(--text-secondary);
-    font-size: 24px;
     margin: 0;
     letter-spacing: 1px;
-  }
-
-  .month-picker {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
   }
 
-  select, button, input[type="text"] {
-    font-family: inherit;
+  .month-picker select {
+    font-size: 14px;
     padding: 8px 12px;
     border: 1px solid var(--border-color);
     border-radius: 8px;
-    background-color: var(--bg-color);
+    background: var(--bg-color);
     color: var(--text-main);
     outline: none;
-  }
-
-  button {
     cursor: pointer;
-    background-color: var(--accent-color);
-    color: white;
-    border: none;
-    transition: background 0.2s;
   }
 
-  button:hover {
-    background-color: var(--accent-hover);
+  .main-layout {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 360px 1fr;
+    gap: 20px;
   }
 
-  h2 {
+  @media (max-width: 900px) {
+    .main-layout { grid-template-columns: 1fr; }
+  }
+
+  .panel {
+    background: var(--card-bg);
+    border-radius: 16px;
+    padding: 24px;
+    box-shadow: var(--shadow);
+  }
+
+  .section-title {
+    font-size: 16px;
     color: var(--text-secondary);
-    font-size: 18px;
     border-bottom: 2px solid var(--border-color);
-    padding-bottom: 6px;
-    margin-top: 30px;
+    padding-bottom: 8px;
+    margin-top: 0;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
   }
 
-  /* 待辦事項區塊 */
   .todo-input-group {
     display: flex;
     gap: 8px;
-    margin-bottom: 15px;
+    margin-bottom: 12px;
   }
 
   .todo-input-group input {
     flex: 1;
+    padding: 8px 12px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: var(--bg-color);
+    font-size: 13px;
+    outline: none;
+  }
+
+  .todo-input-group button {
+    padding: 8px 14px;
+    background: var(--accent-color);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 13px;
+    transition: background 0.2s;
+  }
+
+  .todo-input-group button:hover {
+    background: var(--accent-hover);
   }
 
   .todo-list {
     list-style: none;
     padding: 0;
-    margin: 0;
+    margin: 0 0 24px 0;
   }
 
   .todo-item {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
-    padding: 8px 12px;
-    background-color: var(--bg-color);
+    padding: 8px 10px;
+    background: var(--bg-color);
     border-radius: 8px;
     margin-bottom: 8px;
+    font-size: 13px;
   }
 
   .todo-item label {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 8px;
     cursor: pointer;
     flex: 1;
   }
 
   .todo-item input[type="checkbox"] {
+    margin-top: 3px;
     accent-color: var(--text-secondary);
   }
 
@@ -132,40 +161,44 @@
     color: var(--text-light);
   }
 
+  .todo-subtext {
+    display: block;
+    font-size: 11px;
+    color: var(--text-light);
+    margin-top: 2px;
+  }
+
   .delete-btn {
     background: none;
     border: none;
     color: var(--text-light);
-    font-size: 16px;
+    font-size: 14px;
     cursor: pointer;
-    padding: 0 6px;
+    padding: 0 4px;
   }
 
-  .delete-btn:hover {
-    color: #E57373;
-  }
+  .delete-btn:hover { color: #E57373; }
 
-  /* 月曆表格區塊 */
+  /* 月曆樣式 */
   .calendar-grid {
     display: grid;
     grid-template-columns: repeat(7, 1fr);
-    gap: 8px;
-    margin-top: 15px;
+    gap: 6px;
   }
 
   .weekday-header {
     text-align: center;
-    font-weight: bold;
+    font-weight: 600;
     color: var(--text-secondary);
     padding: 8px 0;
-    background-color: var(--border-color);
+    background: var(--chip-bg);
     border-radius: 6px;
-    font-size: 14px;
+    font-size: 13px;
   }
 
   .day-cell {
-    min-height: 80px;
-    background-color: var(--bg-color);
+    min-height: 85px;
+    background: var(--bg-color);
     border-radius: 8px;
     padding: 6px;
     display: flex;
@@ -173,81 +206,126 @@
     justify-content: space-between;
     cursor: pointer;
     border: 1px solid transparent;
-    transition: border-color 0.2s;
+    transition: all 0.2s;
   }
 
   .day-cell:hover {
     border-color: var(--accent-color);
+    background: #FFF;
   }
 
   .day-cell.empty {
-    background-color: transparent;
+    background: transparent;
     cursor: default;
+    border: none;
   }
 
   .day-number {
-    font-weight: bold;
-    font-size: 13px;
+    font-weight: 600;
+    font-size: 12px;
     color: var(--text-secondary);
   }
 
-  .day-event {
-    font-size: 11px;
-    color: var(--text-main);
-    background-color: white;
-    padding: 4px;
-    border-radius: 4px;
+  .day-events {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
     margin-top: 4px;
-    word-break: break-word;
-    box-shadow: 0 1px 3px rgba(0,0,0,0.05);
   }
 
-  @media (max-width: 600px) {
-    body { padding: 10px; }
-    .container { padding: 15px; }
-    .day-cell { min-height: 65px; padding: 4px; }
-    .day-number { font-size: 11px; }
-    .day-event { font-size: 10px; }
+  .event-tag {
+    font-size: 10px;
+    line-height: 1.3;
+    color: var(--text-main);
+    background: #FFFFFF;
+    padding: 3px 5px;
+    border-radius: 4px;
+    border-left: 3px solid var(--accent-color);
+    word-break: break-word;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.03);
   }
 </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="header-control">
-    <h1>☕ 奶油系溫柔生活月曆</h1>
-    <div class="month-picker">
-      <select id="yearSelect" onchange="renderCalendar()"></select>
-      <select id="monthSelect" onchange="renderCalendar()"></select>
+<div class="header-banner">
+  <h1>☕ Omo! Sindy 奶油系溫柔生活月曆</h1>
+  <div class="month-picker">
+    <select id="yearSelect" onchange="renderCalendar()"></select>
+    <select id="monthSelect" onchange="renderCalendar()"></select>
+  </div>
+</div>
+
+<div class="main-layout">
+  <!-- 左側：每日固定日常 & 每週待辦 -->
+  <div class="panel">
+    <h2 class="section-title">✨ 每日固定日常 Routines</h2>
+    <div class="todo-input-group">
+      <input type="text" id="routineInput" placeholder="新增固定日常項目...">
+      <button onclick="addRoutine()">新增</button>
     </div>
+    <ul class="todo-list" id="routineList"></ul>
+
+    <h2 class="section-title">🌿 每週待辦事項 Weekly To-Dos</h2>
+    <div class="todo-input-group">
+      <input type="text" id="weeklyInput" placeholder="新增每週待辦事項...">
+      <button onclick="addWeekly()">新增</button>
+    </div>
+    <ul class="todo-list" id="weeklyList"></ul>
   </div>
 
-  <h2>✨ 自訂常規 / 待辦事項</h2>
-  <div class="todo-input-group">
-    <input type="text" id="newTodoInput" placeholder="輸入新增待辦事項 (如：批發補貨、運動...)">
-    <button onclick="addTodo()">新增</button>
+  <!-- 右側：萬用動態月曆 -->
+  <div class="panel">
+    <h2 class="section-title">📅 月份重點日誌 & 專屬行程 <span style="font-size: 11px; font-weight: normal; color: var(--text-light); margin-left: 6px;">(點擊日期即可自由編輯)</span></h2>
+    <div class="calendar-grid" id="calendarGrid"></div>
   </div>
-  <ul class="todo-list" id="todoList"></ul>
-
-  <h2>📅 月份行事曆 (點擊日期輸入行程)</h2>
-  <div class="calendar-grid" id="calendarGrid"></div>
 </div>
 
 <script>
-  let currentDate = new Date();
-  let todos = JSON.parse(localStorage.getItem('my_calendar_todos')) || [];
-  let events = JSON.parse(localStorage.getItem('my_calendar_events')) || {};
+  const defaultRoutines = [
+    { id: 1, text: 'Omo! Sindy 選品店營運', sub: '- Kakao Story / New Arrivals', done: false },
+    { id: 2, text: '工作處理', sub: '- system update, 消息與訊息確認', done: false },
+    { id: 3, text: '生活整理', sub: '- Muji clean home', done: false },
+    { id: 4, text: '家庭時光', sub: "- kids' bedtime routine", done: false }
+  ];
+
+  const defaultWeekly = [
+    { id: 101, text: '網頁小工具優化', done: true },
+    { id: 102, text: '庫存與耗材整理', done: true },
+    { id: 103, text: '個人靈感記錄', sub: '- iPad sketch, stickers', done: true }
+  ];
+
+  const defaultEvents = {
+    '2026-11-1': '週末大掃除 / 備置',
+    '2026-11-2': '南大門批發確認 (新品清單)',
+    '2026-11-3': 'Omo! Sindy 新品開賣 & 奶油色素材',
+    '2026-11-5': '庫存盤點 / 耗材準備 / 紙箱紙卡',
+    '2026-11-6': '訂單處理 & 物流寄件 (出貨!)',
+    '2026-11-7': '家庭採買 / 週末放鬆',
+    '2026-11-12': 'Google Sheets API 測試 (工具)',
+    '2026-11-14': '競品對標 / APT 潮玩 (工具)',
+    '2026-11-15': '耗材準備 / 紙箱紙卡',
+    '2026-11-16': '新品朋友圈文案 / 奶油色素材',
+    '2026-11-20': '嚴選合作 (Omo! Sindy)',
+    '2026-11-21': '奶油朋友圈文案',
+    '2026-11-24': '庫存 & 耗材準備',
+    '2026-11-27': '南大門批發物流寄件 (出貨!)'
+  };
+
+  let routines = JSON.parse(localStorage.getItem('my_routines')) || defaultRoutines;
+  let weeklyTodos = JSON.parse(localStorage.getItem('my_weekly')) || defaultWeekly;
+  let events = JSON.parse(localStorage.getItem('my_events')) || defaultEvents;
 
   function init() {
     const yearSelect = document.getElementById('yearSelect');
     const monthSelect = document.getElementById('monthSelect');
+    const now = new Date();
 
-    const currentYear = currentDate.getFullYear();
-    for (let y = currentYear - 2; y <= currentYear + 5; y++) {
+    for (let y = 2024; y <= 2030; y++) {
       const opt = document.createElement('option');
       opt.value = y;
       opt.textContent = y + ' 年';
-      if (y === currentYear) opt.selected = true;
+      if (y === 2026) opt.selected = true;
       yearSelect.appendChild(opt);
     }
 
@@ -255,55 +333,100 @@
       const opt = document.createElement('option');
       opt.value = m - 1;
       opt.textContent = m + ' 月';
-      if (m - 1 === currentDate.getMonth()) opt.selected = true;
+      if (m === 11) opt.selected = true;
       monthSelect.appendChild(opt);
     }
 
-    renderTodos();
+    renderRoutines();
+    renderWeekly();
     renderCalendar();
   }
 
-  /* 待辦事項邏輯 */
-  function addTodo() {
-    const input = document.getElementById('newTodoInput');
-    const text = input.value.trim();
-    if (!text) return;
-    todos.push({ id: Date.now(), text: text, done: false });
+  /* Routines 邏輯 */
+  function addRoutine() {
+    const input = document.getElementById('routineInput');
+    if (!input.value.trim()) return;
+    routines.push({ id: Date.now(), text: input.value.trim(), done: false });
     input.value = '';
     saveData();
-    renderTodos();
+    renderRoutines();
   }
 
-  function toggleTodo(id) {
-    todos = todos.map(t => t.id === id ? { ...t, done: !t.done } : t);
+  function toggleRoutine(id) {
+    routines = routines.map(item => item.id === id ? { ...item, done: !item.done } : item);
     saveData();
-    renderTodos();
+    renderRoutines();
   }
 
-  function deleteTodo(id) {
-    todos = todos.filter(t => t.id !== id);
+  function deleteRoutine(id) {
+    routines = routines.filter(item => item.id !== id);
     saveData();
-    renderTodos();
+    renderRoutines();
   }
 
-  function renderTodos() {
-    const list = document.getElementById('todoList');
+  function renderRoutines() {
+    const list = document.getElementById('routineList');
     list.innerHTML = '';
-    todos.forEach(todo => {
+    routines.forEach(item => {
       const li = document.createElement('li');
-      li.className = `todo-item ${todo.done ? 'completed' : ''}`;
+      li.className = `todo-item ${item.done ? 'completed' : ''}`;
       li.innerHTML = `
         <label>
-          <input type="checkbox" ${todo.done ? 'checked' : ''} onchange="toggleTodo(${todo.id})">
-          <span>${escapeHtml(todo.text)}</span>
+          <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleRoutine(${item.id})">
+          <div>
+            <span>${escapeHtml(item.text)}</span>
+            ${item.sub ? `<span class="todo-subtext">${escapeHtml(item.sub)}</span>` : ''}
+          </div>
         </label>
-        <button class="delete-btn" onclick="deleteTodo(${todo.id})">✕</button>
+        <button class="delete-btn" onclick="deleteRoutine(${item.id})">✕</button>
       `;
       list.appendChild(li);
     });
   }
 
-  /* 月曆渲染與行程邏輯 */
+  /* Weekly To-Dos 邏輯 */
+  function addWeekly() {
+    const input = document.getElementById('weeklyInput');
+    if (!input.value.trim()) return;
+    weeklyTodos.push({ id: Date.now(), text: input.value.trim(), done: false });
+    input.value = '';
+    saveData();
+    renderWeekly();
+  }
+
+  function toggleWeekly(id) {
+    weeklyTodos = weeklyTodos.map(item => item.id === id ? { ...item, done: !item.done } : item);
+    saveData();
+    renderWeekly();
+  }
+
+  function deleteWeekly(id) {
+    weeklyTodos = weeklyTodos.filter(item => item.id !== id);
+    saveData();
+    renderWeekly();
+  }
+
+  function renderWeekly() {
+    const list = document.getElementById('weeklyList');
+    list.innerHTML = '';
+    weeklyTodos.forEach(item => {
+      const li = document.createElement('li');
+      li.className = `todo-item ${item.done ? 'completed' : ''}`;
+      li.innerHTML = `
+        <label>
+          <input type="checkbox" ${item.done ? 'checked' : ''} onchange="toggleWeekly(${item.id})">
+          <div>
+            <span>${escapeHtml(item.text)}</span>
+            ${item.sub ? `<span class="todo-subtext">${escapeHtml(item.sub)}</span>` : ''}
+          </div>
+        </label>
+        <button class="delete-btn" onclick="deleteWeekly(${item.id})">✕</button>
+      `;
+      list.appendChild(li);
+    });
+  }
+
+  /* Calendar 邏輯 */
   function renderCalendar() {
     const year = parseInt(document.getElementById('yearSelect').value);
     const month = parseInt(document.getElementById('monthSelect').value);
@@ -335,7 +458,9 @@
 
       cell.innerHTML = `
         <div class="day-number">${d}</div>
-        <div class="day-event">${escapeHtml(eventText)}</div>
+        <div class="day-events">
+          ${eventText ? `<div class="event-tag">${escapeHtml(eventText)}</div>` : ''}
+        </div>
       `;
 
       cell.onclick = () => editEvent(dateKey, d, eventText);
@@ -344,7 +469,7 @@
   }
 
   function editEvent(dateKey, day, currentText) {
-    const newText = prompt(`請輸入 ${dateKey} 的專屬行程與重點事項：`, currentText);
+    const newText = prompt(`修改 ${dateKey} 的專屬行程：`, currentText);
     if (newText !== null) {
       if (newText.trim() === '') {
         delete events[dateKey];
@@ -357,8 +482,9 @@
   }
 
   function saveData() {
-    localStorage.setItem('my_calendar_todos', JSON.stringify(todos));
-    localStorage.setItem('my_calendar_events', JSON.stringify(events));
+    localStorage.setItem('my_routines', JSON.stringify(routines));
+    localStorage.setItem('my_weekly', JSON.stringify(weeklyTodos));
+    localStorage.setItem('my_events', JSON.stringify(events));
   }
 
   function escapeHtml(text) {
